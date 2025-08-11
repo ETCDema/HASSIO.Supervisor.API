@@ -77,7 +77,7 @@ namespace HASSIO.Supervisor.API.Services
 				.Run(myCancel.Token)
 				.ContinueWith(t =>
 				{
-					_log.LogInformation("Service stopped");
+					_log.LogInformation("🛑 Service stopped");
 				});
 		}
 

@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading.Tasks;
 
 using HASSIO.Supervisor.API.Services;
 
@@ -21,9 +22,17 @@ namespace HASSIO.Supervisor.API
 
 		public static Task RunHASSIOSupervisorCoreAsync(this IHost host)
 		{
+			var appLifetime     = host.Services.GetRequiredService<IHostApplicationLifetime>();
+
+			Console.CancelKeyPress      += (sender, e) =>
+			{
+				e.Cancel		= true;
+				appLifetime.StopApplication();
+			};
+
 			return host.Services
 					   .GetRequiredService<HASSIOSupervisorCore>()
-					   .RunAsync(host.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping);
+					   .RunAsync(appLifetime.ApplicationStopping);
 		}
 	}
 }
