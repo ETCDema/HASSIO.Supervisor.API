@@ -1,4 +1,4 @@
-﻿using System;
+﻿using System.Threading;
 using System.Threading.Tasks;
 
 using HASSIO.Supervisor.API.Services;
@@ -20,19 +20,15 @@ namespace HASSIO.Supervisor.API
 												endpoint));
 		}
 
-		public static Task RunHASSIOSupervisorCoreAsync(this IHost host)
+		public static async Task RunHASSIOSupervisorCoreAsync(this IHost host)
 		{
-			var appLifetime     = host.Services.GetRequiredService<IHostApplicationLifetime>();
+			// Тут выполняется инициализация обработчиков остановки приложения
+			await host.Services.GetRequiredService<IHostLifetime>().WaitForStartAsync(CancellationToken.None);
 
-			Console.CancelKeyPress      += (sender, e) =>
-			{
-				e.Cancel		= true;
-				appLifetime.StopApplication();
-			};
-
-			return host.Services
+			// Запускаем сервис
+			await host.Services
 					   .GetRequiredService<HASSIOSupervisorCore>()
-					   .RunAsync(appLifetime.ApplicationStopping);
+					   .RunAsync(host.Services.GetRequiredService<IHostApplicationLifetime>().ApplicationStopping);
 		}
 	}
 }
